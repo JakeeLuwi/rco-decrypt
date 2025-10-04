@@ -24,7 +24,7 @@ const pagePushRegexTriParamSecondShuffle = "([a-zA-Z0-9]+)\\(*'[^']*',\\s{{0}},\
 const pagePushRegexWeirdParamShuffle = "([^\\s(]+)\\([^,]+,[^,]+,\\s*{{0}},\\s*'([^']+)'";
 const pagePushRegexWeirdParamShuffle2 = "([^\\s(]+)\\([^,]+,[^,]+,\\s*{{0}},[^,]+,\\s*'([^']+)'";
 const pagePushRegexWeirdParamShuffle3 = "([^\\s(]+)\\(\\s*['\"].*?['\"]\\s*,\\s*['\"].*?['\"]\\s*,\\s*{{0}},\\s*['\"].*?['\"],\\s*['\"].*?['\"],\\s*'(.*?)'";
-const pagePushRegexWeirdParamShuffle4 = "([^\\s(]+)\\(\\s*{{0}}\\s*,\\s*['\"]*.*?['\"]*\\s*,\\s*['\"](.*?)['\"]";
+const pagePushRegexWeirdParamShuffle4 = "([^\\s(]+)\\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,\\s*{{0}}\\s*,[^,]+,\\s*['\"](.*?)['\"]";
 
 funniRegexReborn(/var\s+([^\s=]+)\s*=\s*''\s*;/g, equalsRegexLookup, pageEqualsRegex);
 funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pageNewArrayRegex);
@@ -121,7 +121,7 @@ function decryptLink(encryptedString, subStrAt = 0) {
   let result = encryptedString
     //.replace(/\w{5}__\w{3}__/g, "g")
     //.replace(/\w{2}__\w{6}_/g, "a")
-    .replace(/\w{2}__\w{6}_/g, "d")
+    .replace(/\w{2}__\w{6}_/g, "e")
     .replace(/b/g, "pw_.g28x")
     .replace(/h/g, "d2pr.x_27")
     .replace(/pw_.g28x/g, "b")
