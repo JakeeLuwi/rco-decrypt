@@ -12,7 +12,7 @@ const urlPattern = /^https?:\/\/(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:[\/a-z
 const reverseOrder = false;
 
 // Detect obfuscation replacement pattern dynamically
-const replacePatternRegex = /\.replace\(\s*\/(\w{2,}__\w+_)\/g\s*,\s*'(\w)'\s*\)/;
+const replacePatternRegex = /\.replace\(\s*\/(\w{2,}__\w+_)\/g\s*,\s*['"](\w)['"]\s*\)/;
 const replaceMatch = _encryptedString.match(replacePatternRegex);
 const obfuscationPattern = replaceMatch ? new RegExp(replaceMatch[1], 'g') : /\w{2}__\w{6}_/g;
 const replacementChar = replaceMatch ? replaceMatch[2] : 'e';
@@ -37,7 +37,7 @@ const pagePushRegexWeirdParamShuffle4 = "([^\\s(]+)\\([^,]+,[^,]+,[^,]+,[^,]+,[^
 const arrayVars = [..._encryptedString.matchAll(/var\s+(\w+)\s*=\s*new\s+Array\(\)\s*;/g)].map(m => m[1]);
 
 arrayVars.forEach(arrVar => {
-  const callRegex = new RegExp('\\w+\\s*\\([^)]*\\b' + arrVar + '\\b[^)]*,\\s*["\']([^"\']{20,})["\']\\s*\\)', 'g');
+  const callRegex = new RegExp('\\w+\\s*\\([^)]*\\b' + arrVar + '\\b[^)]*,\\s*["\']([^"\']{20,})["\'][,\\s]*\\)', 'g');
   const calls = [..._encryptedString.matchAll(callRegex)];
   if (calls.length === 0) return;
   const values = calls.map(c => c[1]);
