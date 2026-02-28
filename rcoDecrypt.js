@@ -11,6 +11,12 @@ const pageLinks = new Array();
 const urlPattern = /^https?:\/\/(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:[\/a-z0-9-._~:?#@!$&'()*+,;=%]*)$/i;
 const reverseOrder = false;
 
+// Detect obfuscation replacement pattern dynamically
+const replacePatternRegex = /\.replace\(\s*\/(\w{2,}__\w+_)\/g\s*,\s*['"](\w)['"]\s*\)/;
+const replaceMatch = _encryptedString.match(replacePatternRegex);
+const obfuscationPattern = replaceMatch ? new RegExp(replaceMatch[1], 'g') : /\w{2}__\w{6}_/g;
+const replacementChar = replaceMatch ? replaceMatch[2] : 'e';
+
 // Regex Strings
 const replaceSymbol = "{{0}}";
 const newArrayRegexLookup = "var\\s+({{0}})\\s*=\\s*new\\s+Array\\(\\)\\s*;";
@@ -26,6 +32,22 @@ const pagePushRegexWeirdParamShuffle2 = "([^\\s(]+)\\([^,]+,[^,]+,\\s*{{0}},[^,]
 const pagePushRegexWeirdParamShuffle3 = "([^\\s(]+)\\(\\s*['\"].*?['\"]\\s*,\\s*['\"].*?['\"]\\s*,\\s*{{0}},\\s*['\"].*?['\"],\\s*['\"].*?['\"],\\s*'(.*?)'";
 const pagePushRegexWeirdParamShuffle4 = "([^\\s(]+)\\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,\\s*{{0}}\\s*,[^,]+,\\s*['\"](.*?)['\"]";
 
+// Method 1: Find custom function calls that pass a long string alongside a known array variable
+// e.g. dTfnT(2, 3, 4, 1, _54BkmOX9Y, 7, 1, "afobagKat...encodedImageUrl...")
+const arrayVars = [..._encryptedString.matchAll(/var\s+(\w+)\s*=\s*new\s+Array\(\)\s*;/g)].map(m => m[1]);
+
+arrayVars.forEach(arrVar => {
+  const callRegex = new RegExp('\\w+\\s*\\([^)]*\\b' + arrVar + '\\b[^)]*,\\s*["\']([^"\']{20,})["\'][,\\s]*\\)', 'g');
+  const calls = [..._encryptedString.matchAll(callRegex)];
+  if (calls.length === 0) return;
+  const values = calls.map(c => c[1]);
+  const offset = findTheGoat(values);
+  calls.forEach(c => {
+    if (c[1]) pageLinks.push(decryptLink(c[1], offset));
+  });
+});
+
+// Method 2: Standard regex patterns (fallback for older site versions)
 funniRegexReborn(/var\s+([^\s=]+)\s*=\s*''\s*;/g, equalsRegexLookup, pageEqualsRegex);
 funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pageNewArrayRegex);
 funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegex);
@@ -121,7 +143,7 @@ function decryptLink(encryptedString, subStrAt = 0) {
   let result = encryptedString
     //.replace(/\w{5}__\w{3}__/g, "g")
     //.replace(/\w{2}__\w{6}_/g, "a")
-    .replace(/\w{2}__\w{6}_/g, "e")
+    .replace(obfuscationPattern, replacementChar)
     .replace(/b/g, "pw_.g28x")
     .replace(/h/g, "d2pr.x_27")
     .replace(/pw_.g28x/g, "b")
