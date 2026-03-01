@@ -12,7 +12,7 @@ const urlPattern = /^https?:\/\/(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:[\/a-z
 const reverseOrder = false;
 
 // Detect obfuscation replacement pattern dynamically
-const replacePatternRegex = /\.replace\(\s*\/(\w{2,}__\w+_)\/g\s*,\s*['"](\w)['"]\s*\)/;
+const replacePatternRegex = /\.replace\(\s*\/(\w+__\w+_)\/g\s*,\s*['"](\w)['"]\s*\)/;
 const replaceMatch = _encryptedString.match(replacePatternRegex);
 const obfuscationPattern = replaceMatch ? new RegExp(replaceMatch[1], 'g') : /\w{2}__\w{6}_/g;
 const replacementChar = replaceMatch ? replaceMatch[2] : 'e';
@@ -75,11 +75,7 @@ function atob(input) {
 function decryptLink(encryptedString, subStrAt = 0) {
   // First encryption
   let result = encryptedString
-    //.replace(/\w{5}__\w{3}__/g, "g")
-    //.replace(/\w{2}__\w{6}_/g, "a")
     .replace(obfuscationPattern, replacementChar)
-    .replace(/b/g, "pw_.g28x")
-    .replace(/h/g, "d2pr.x_27")
     .replace(/pw_.g28x/g, "b")
     .replace(/d2pr.x_27/g, "h");
 
