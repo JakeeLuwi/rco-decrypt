@@ -17,22 +17,7 @@ const replaceMatch = _encryptedString.match(replacePatternRegex);
 const obfuscationPattern = replaceMatch ? new RegExp(replaceMatch[1], 'g') : /\w{2}__\w{6}_/g;
 const replacementChar = replaceMatch ? replaceMatch[2] : 'e';
 
-// Regex Strings
-const replaceSymbol = "{{0}}";
-const newArrayRegexLookup = "var\\s+({{0}})\\s*=\\s*new\\s+Array\\(\\)\\s*;";
-const equalsRegexLookup = "var\\s+({{0}})\\s*=\\s*''\\s*;";
-
-const pageNewArrayRegex = "(\\b{{0}}\\s*\\.push\\(\\s*['\"])([^'\"]+)(['\"]\\s*\\))";
-const pageEqualsRegex = "({{0}})\\s*=\\s*['\"](.*?)['\"]\\s*;?";
-const pagePushRegex = "([a-zA-Z0-9]+)\\({{0}},\\s*'([^']+)'\\);";
-const pagePushRegexTriParam = "([a-zA-Z0-9]+)\\({{0}},\\s*'[^']*',\\s*'([^']+)'\\);";
-const pagePushRegexTriParamSecondShuffle = "([a-zA-Z0-9]+)\\(*'[^']*',\\s{{0}},\\s*'([^']+)'\\);";
-const pagePushRegexWeirdParamShuffle = "([^\\s(]+)\\([^,]+,[^,]+,\\s*{{0}},\\s*'([^']+)'";
-const pagePushRegexWeirdParamShuffle2 = "([^\\s(]+)\\([^,]+,[^,]+,\\s*{{0}},[^,]+,\\s*'([^']+)'";
-const pagePushRegexWeirdParamShuffle3 = "([^\\s(]+)\\(\\s*['\"].*?['\"]\\s*,\\s*['\"].*?['\"]\\s*,\\s*{{0}},\\s*['\"].*?['\"],\\s*['\"].*?['\"],\\s*'(.*?)'";
-const pagePushRegexWeirdParamShuffle4 = "([^\\s(]+)\\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,\\s*{{0}}\\s*,[^,]+,\\s*['\"](.*?)['\"]";
-
-// Method 1: Find custom function calls that pass a long string alongside a known array variable
+// Find custom function calls that pass a long string alongside a known array variable
 // e.g. dTfnT(2, 3, 4, 1, _54BkmOX9Y, 7, 1, "afobagKat...encodedImageUrl...")
 const arrayVars = [..._encryptedString.matchAll(/var\s+(\w+)\s*=\s*new\s+Array\(\)\s*;/g)].map(m => m[1]);
 
@@ -47,54 +32,6 @@ arrayVars.forEach(arrVar => {
   });
 });
 
-// Method 2: Standard regex patterns (fallback for older site versions)
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*''\s*;/g, equalsRegexLookup, pageEqualsRegex);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pageNewArrayRegex);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegex);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegexTriParam);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegexTriParamSecondShuffle);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegexWeirdParamShuffle);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegexWeirdParamShuffle2);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegexWeirdParamShuffle3);
-funniRegexReborn(/var\s+([^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, newArrayRegexLookup, pagePushRegexWeirdParamShuffle4);
-
-// Funni memories
-//funniRegex(/var\s+(_[^\s=]+mvn)\s*(?:=\s*[^;]+)?\s*;/);
-//funniRegex(/var\s+(_[^\s=]+mxn)\s*(?:=\s*[^;]+)?\s*;/);
-//funniRegex(/var\s+(_(?!.*mxn)[a-zA-Z0-9]+)\s*=\s*'rcoz'\s*;/);
-//funniRegex(/var\s+(_(\w{7})+)\s*=\s*'rcoz'\s*;/);
-//funniRegex(/var\s+(_(\w{7})+)\s*=\s*'rcox'\s*;/);
-//funniRegex(/var\s+(_[^\s=]+)\s*=\s*''\s*;/g, true, true);
-//funniRegex(/var\s+(c_[^\s=]+)\s*(?:=\s*[^;]+)?\s*;/g, true);
-//funniRegex(/var\s+(_[^\s=]+)\s*=\s*new\s+Array\(\)\s*;/g, true);
-
-function funniRegexReborn(reg, lookup, page) {
-  const varMatches = [..._encryptedString.matchAll(reg)];
-
-  varMatches.forEach(match => {
-    funniRegexAntiStupidlyBlatantAdsReborn(new RegExp(toSophisticatedRegexString(match[1], lookup)), page);
-  });
-}
-
-function funniRegexAntiStupidlyBlatantAdsReborn(lookupRegex, page) {
-  const varMatch = _encryptedString.match(lookupRegex);
-
-  if (!varMatch) {
-    return;
-  }
-
-  const pagesListRegex = new RegExp(toSophisticatedRegexString(varMatch[1], page), "g");
-  const matches = [..._encryptedString.matchAll(pagesListRegex)];
-
-  const array = matches.map(match => match[2]);
-  const num = findTheGoat(array);
-
-  matches.forEach((match) => {
-    if (match[2]) {
-      pageLinks.push(decryptLink(match[2], num));
-    }
-  });
-}
 
 function findTheGoat(array) {
   if (array.length === 0) return 0;
@@ -119,9 +56,6 @@ function findTheGoat(array) {
   return zeGoat;
 }
 
-function toSophisticatedRegexString(varSymbol, regexString) {
-  return regexString.replace(replaceSymbol, varSymbol);
-}
 
 function atob(input) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
