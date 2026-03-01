@@ -26,34 +26,34 @@ arrayVars.forEach(arrVar => {
   const calls = [..._encryptedString.matchAll(callRegex)];
   if (calls.length === 0) return;
   const values = calls.map(c => c[1]);
-  const offset = findTheGoat(values);
+  const offset = findPrefixOffset(values);
   calls.forEach(c => {
     if (c[1]) pageLinks.push(decryptLink(c[1], offset));
   });
 });
 
 
-function findTheGoat(array) {
+function findPrefixOffset(array) {
   if (array.length === 0) return 0;
 
-  const potentialGoat = array[0];
+  const ref = array[0];
 
-  let zeGoat = 0;
-  for (let i = 0; i < potentialGoat.length; i++) {
-    const char = potentialGoat[i];
+  let length = 0;
+  for (let i = 0; i < ref.length; i++) {
+    const char = ref[i];
 
     if (array.every(str => str[i] === char)) {
-      zeGoat++;
+      length++;
       
-      if (zeGoat >= 5 && potentialGoat.slice(zeGoat - 5, zeGoat) === "https") {
-        return zeGoat - 5;
+      if (length >= 5 && ref.slice(length - 5, length) === "https") {
+        return length - 5;
       }
     } else {
       break;
     }
   }
 
-  return zeGoat;
+  return length;
 }
 
 
@@ -125,7 +125,7 @@ function decryptLink(encryptedString, subStrAt = 0) {
   return result;
 }
 
-const fuckedLinks = [
+const blocklist = [
   "https://2.bp.blogspot.com/pw/AP1GczP6zCVVfdmN6OoVnm7CLvEfmHMUawyEwJWouX9C6SHwsiuYfLkUr9FsM6Zo34qNzPKeQeahBx9ckBZJQckiJmX1UwKD7uh900yz5rKyG4zT2rfIrqFviEJIev1Pg_pGRuSG57rIH6BDwGCTmiE4MjA",
   "https://2.bp.blogspot.com/pw/AP1GczP48thKMga7cud0tjtHtYqsvZzhYY0HyAxVzM3O1D6tkLbi0fT9NDZFFFH69hNnoGsnqJSEIh4mmpEoU1BJSfNXIz1f5aLXl41RM9os7ePn7ipbrYbIuqiQxAV0hhJZrNLl7FmauwLQ01paCrP6KAE",
   "https://2.bp.blogspot.com/pw/AP1GczNXprTMfAP2AHFFWvCbKq6qReXrqSohz87KeBjV0nh6XoLsE1NpzL7Rp9llxoY208IPARiIDON_TO6dZB0ZMNeB8J7xzUzbS9h6To7aGpOZshFofw-wFQ0KJ3y3wolSwzLrduZZ_0w8_6gGuTEB-98",
@@ -142,7 +142,7 @@ function getCleanedLinks() {
 
     const cleanLink = item.split("?")[0].split("=")[0];
     const isUnique = pageLinks.findIndex(link => link.split("?")[0].split("=")[0] === cleanLink) === index;
-    const isNotBlocked = fuckedLinks.indexOf(cleanLink) === -1;
+    const isNotBlocked = blocklist.indexOf(cleanLink) === -1;
     const matchesPattern = urlPattern.test(cleanLink);
     
     return isUnique && isNotBlocked && matchesPattern;
