@@ -117,7 +117,7 @@ function decryptLink(encryptedString, subStrAt = 0) {
       decodedStr.substring(0, decodedStr.length - 2) +
       (isS0 ? "=s0" : "=s1600");
 
-    const domain = !_useServer2 ? "https://2.bp.blogspot.com" : "https://img1.whatsnew247.net/pic";
+    const domain = !_useServer2 ? "https://2.bp.blogspot.com" : "https://ano1.rconet.biz/pic";
 
     result = `${domain}/${decodedStr}${firstStringSubS}${_useServer2 ? "&t=10" : ""}`;
   }
