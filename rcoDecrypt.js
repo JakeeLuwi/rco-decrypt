@@ -21,6 +21,10 @@ const replacementChar = replaceMatch ? replaceMatch[2] : 'e';
 // e.g. dTfnT(2, 3, 4, 1, _54BkmOX9Y, 7, 1, "afobagKat...encodedImageUrl...")
 const arrayVars = [..._encryptedString.matchAll(/var\s+(\w+)\s*=\s*new\s+Array\(\)\s*;/g)].map(m => m[1]);
 
+// Detect base URL from the site's decode function
+const baseUrlMatch = _encryptedString.match(/baeu\(\w+,\s*["'](https?:\/\/[^"']+)["']\)/);
+const detectedBaseUrl = baseUrlMatch ? baseUrlMatch[1] : null;
+
 arrayVars.forEach(arrVar => {
   const callRegex = new RegExp('\\w+\\s*\\([^)]*\\b' + arrVar + '\\b[^)]*,\\s*["\']([^"\']{20,})["\'][,\\s]*\\)', 'g');
   const calls = [..._encryptedString.matchAll(callRegex)];
@@ -117,7 +121,7 @@ function decryptLink(encryptedString, subStrAt = 0) {
       decodedStr.substring(0, decodedStr.length - 2) +
       (isS0 ? "=s0" : "=s1600");
 
-    const domain = !_useServer2 ? "https://2.bp.blogspot.com" : "https://ano1.rconet.biz/pic";
+        const domain = detectedBaseUrl ?? (_useServer2 ? "https://ano1.rconet.biz/pic" : "https://2.bp.blogspot.com");
 
     result = `${domain}/${decodedStr}${firstStringSubS}${_useServer2 ? "&t=10" : ""}`;
   }
